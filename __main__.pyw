@@ -5,14 +5,17 @@ init()
 class main:
     def __init__(this):
         this.correctbits = [False]*8
+        this.number = 0
         this.score = 0
-        this.screen = display.set_mode([640,480])
+        this.previousnumberwidth = 0
+        this.screen = display.set_mode([640,480],FULLSCREEN)
         display.set_caption("Sign and Magnitude")
         clock = time.Clock()
-        this.submit_topleft = [320,200]
-        this.submit_bottomright = [360,260]
-        #draw.rect(this.screen,(200,0,0),(*this.submit_topleft,this.submit_bottomright[0] - this.submit_topleft[0],this.submit_bottomright[1] - this.submit_topleft[1]))
-        this.screen.blit(Bit.bitfont.render("Submit",True,(300,300),background=(200,0,0)))
+        submittext = Bit.bitfont.render("Submit",True,(0,0,200))
+        this.submit_topleft = [320 - submittext.get_width() / 2,200]
+        this.submit_bottomright = [this.submit_topleft[0] + submittext.get_width(),this.submit_topleft[0] + submittext.get_height()]
+        draw.rect(this.screen,(200,0,0),(*this.submit_topleft,submittext.get_width(),submittext.get_height()))
+        this.screen.blit(submittext,this.submit_topleft)
         this.bitgroup = BitGroup(this.screen)
         for i in range(40,640,80):
             this.bitgroup.append(Bit(this.screen,(i,100)))
@@ -31,17 +34,23 @@ class main:
             clock.tick(20)
         quit()
     def newnumber(this):
+        previousnumber = this.number
         while True:
-            this.number = randint(-255,255)
-            if this.number != 0: break
+            this.number = randint(-127,127)
+            if this.number != 0 and this.number != previousnumber: break
         total = abs(this.number)
         this.correctbits[0] = this.number < 0
         for i in range(1,8):
-            if total - 2 ** (8-i) >= 0:
+            value = 2 ** (7-i)
+            if total - value >= 0:
                 this.correctbits[i] = True
-                total -= this.number
+                total -= value
             else:
                 this.correctbits[i] = False
+        text = Bit.bitfont.render(str(this.number),True,(255,255,255))
+        draw.rect(this.screen,(0,0,0),(320 - this.previousnumberwidth / 2,0,this.previousnumberwidth,text.get_height()))
+        this.screen.blit(text,(320 - text.get_width() / 2,0))
+        this.previousnumberwidth = text.get_width()
     def checksubmit(this,pos):
         if this.submit_topleft[0] <= pos[0] <= this.submit_bottomright[0] and this.submit_topleft[1] <= pos[1] <= this.submit_bottomright[1]:
             correct = True
@@ -51,10 +60,16 @@ class main:
                     break
             if correct:
                 this.score += 1
-                screen.blit(Bit.bitfont.render("Score: " + str(this.score),True,(200,200,200)),(0,0))
+                text = Bit.bitfont.render("Score: " + str(this.score),True,(200,200,200))
+                draw.rect(this.screen,(0,0,0),(0,0,text.get_width(),text.get_height()))
+                this.screen.blit(text,(0,0))
                 this.newnumber()
+                text = Bit.bitfont.render("Correct",True,(0,0,0))
+                draw.rect(this.screen,(0,255,0),(0,300,640,text.get_height()))
             else:
-                print("incorrect")
+                text = Bit.bitfont.render("Incorrect",True,(255,255,255))
+                draw.rect(this.screen,(255,0,0),(0,300,640,text.get_height()))
+            this.screen.blit(text,(320 - text.get_width() / 2,300))
             return True
         else:
             return False
