@@ -4,5 +4,7 @@ A number is displayed at the top of the screen. Represent the number in sign-and
 See the screenshots folder for an example of the game working.
 ## Install
 Visit the releases page and copy the link to the latest whl file. Then run `pip install [release link]`
+## Run
+Run `py -m Sign-and-Magnitude-Game` (using the correct Python executable) to launch the game
 ## Requirements
 pygame will be installed with this game
